@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Patient Dashboard - HealthConnect</title>
+  <link rel="stylesheet" href="../css/style.css" />
+</head>
+<body>
+  <!-- Header: Site title and navigation -->
+  <header>
+    <h1>HealthConnect</h1>
+    <div class="nav-buttons">
+      <!-- Navigation links -->
+      <a href="../index.html" class="nav-button">Home</a>
+      <a href="appointment.html" class="nav-button">View Appointments</a>
+    </div>
+  </header>
+
+  <main>
+    <section class="center-image-container" style="min-height:unset; margin-top:2rem; align-items:stretch;">
+      <div class="dashboard-container">
+        <div class="dashboard-header">
+          <!-- Personalized welcome message -->
+          <h2 id="welcomePatient" class="welcome-title">Welcome, Patient!</h2>
+          <!-- Button to book a new appointment -->
+          <button onclick="openBookingModal()" class="book-appointment-btn">+ Book Appointment</button>
+        </div>
+        <h3 class="section-title">Your Appointments</h3>
+        <div class="table-container">
+          <!-- Table to display all appointments for the patient -->
+          <table id="patientAppointmentsTable" class="modern-table">
+            <thead>
+              <tr>
+                <th>Doctor</th>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Status</th>
+                <th>Reschedule</th>
+                <th>Cancel</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Appointment rows will be populated via JS -->
+            </tbody>
+          </table>
+          <!-- Message if no appointments exist -->
+          <div id="emptyAppointmentsMsg" class="empty-message">No appointments yet. Book your first appointment!</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Appointment Booking Modal -->
+  <div id="bookingModal" class="modal">
+    <div class="modal-content">
+      <span class="close-modal" onclick="closeBookingModal()">&times;</span>
+      <h2 class="form-title">Book an Appointment</h2>
+      <form id="appointmentForm" class="modern-appointment-form">
+        <div class="form-grid">
+          <!-- Doctor's name -->
+          <div class="form-group">
+            <label for="doctor">Doctor Name</label>
+            <input type="text" id="doctor" required />
+          </div>
+          <!-- Appointment date -->
+          <div class="form-group">
+            <label for="date">Date</label>
+            <input type="date" id="date" required />
+          </div>
+          <!-- Appointment time -->
+          <div class="form-group">
+            <label for="time">Time</label>
+            <input type="time" id="time" required />
+          </div>
+        </div>
+        <button type="submit" class="nav-button book-btn">Book Appointment</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Footer: Copyright -->
+  <footer>
+    <p>&copy; 2025 HealthConnect. All rights reserved.</p>
+  </footer>
+  <script src="../js/script.js"></script>
+  <script>
+    // --- Patient Dashboard Logic ---
+    // Loads and displays all appointments for the logged-in patient
+    function loadPatientAppointments() {
+      const user = JSON.parse(localStorage.getItem('currentUser'));
+      // Show personalized welcome
+      if (user && user.name) {
+        document.getElementById('welcomePatient').textContent = `Welcome, ${user.name}!`;
+      }
+      // Get all appointments from localStorage
+      const appointments = JSON.parse(localStorage.getItem('appointments')) || [];
+      // Filter appointments for this patient
+      const patientAppointments = appointments.filter(a => a.patientEmail === user?.email);
+      const tbody = document.querySelector('#patientAppointmentsTable tbody');
+      tbody.innerHTML = '';
+      if (patientAppointments.length === 0) {
+        document.getElementById('emptyAppointmentsMsg').style.display = 'block';
+        document.getElementById('patientAppointmentsTable').style.display = 'none';
+      } else {
+        document.getElementById('emptyAppointmentsMsg').style.display = 'none';
+        document.getElementById('patientAppointmentsTable').style.display = '';
+        let statusMessages = [];
+        patientAppointments.forEach(app => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${app.doctorName}</td>
+            <td>${app.date}</td>
+            <td>${app.time}</td>
+            <td><span class="status-badge status-${(app.status || 'Pending').toLowerCase()}">${app.status || 'Pending'}</span></td>
+            <td><button title="Reschedule" class="action-btn" onclick="rescheduleAppointment('${app.id}')">&#8635;</button></td>
+            <td><button title="Cancel" class="action-btn cancel" onclick="cancelAppointment('${app.id}')">&#10006;</button></td>
+          `;
+          tbody.appendChild(tr);
+          // Collect status messages for approved/rejected appointments
+          if (app.status === 'Approved') {
+            statusMessages.push(`Your appointment for <b>${app.date}</b> at <b>${app.time}</b> is <span style='color:#43a047;font-weight:600;'>approved</span>.`);
+          } else if (app.status === 'Rejected') {
+            statusMessages.push(`Your appointment for <b>${app.date}</b> at <b>${app.time}</b> is <span style='color:#e53935;font-weight:600;'>rejected</span>.`);
+          }
+        });
+        // Show status messages below the table
+        let msgDiv = document.getElementById('apptStatusMsg');
+        if (!msgDiv) {
+          msgDiv = document.createElement('div');
+          msgDiv.id = 'apptStatusMsg';
+          msgDiv.className = 'status-messages';
+          tbody.parentElement.parentElement.appendChild(msgDiv);
+        }
+        msgDiv.innerHTML = statusMessages.join('<br>');
+      }
+    }
+
+    // Modal functions
+    function openBookingModal() {
+      document.getElementById('bookingModal').style.display = 'block';
+    }
+
+    function closeBookingModal() {
+      document.getElementById('bookingModal').style.display = 'none';
+    }
+
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+      const modal = document.getElementById('bookingModal');
+      if (event.target === modal) {
+        closeBookingModal();
+      }
+    }
+
+    // Handle appointment form submission
+    document.getElementById('appointmentForm').onsubmit = function(e) {
+      e.preventDefault();
+      const user = JSON.parse(localStorage.getItem('currentUser'));
+      const appointments = JSON.parse(localStorage.getItem('appointments')) || [];
+      
+      const newAppointment = {
+        id: Date.now().toString(),
+        patientName: user.name,
+        patientEmail: user.email,
+        doctorName: document.getElementById('doctor').value,
+        date: document.getElementById('date').value,
+        time: document.getElementById('time').value,
+        status: 'Pending'
+      };
+
+      appointments.push(newAppointment);
+      localStorage.setItem('appointments', JSON.stringify(appointments));
+      
+      // Reset form and close modal
+      this.reset();
+      closeBookingModal();
+      loadPatientAppointments();
+    };
+
+    // Placeholder for reschedule functionality
+    function rescheduleAppointment(id) {
+      alert('Reschedule functionality coming soon!');
+    }
+
+    // Cancel an appointment and update the dashboard
+    function cancelAppointment(id) {
+      if (confirm('Are you sure you want to cancel this appointment?')) {
+        let appointments = JSON.parse(localStorage.getItem('appointments')) || [];
+        appointments = appointments.filter(a => a.id !== id);
+        localStorage.setItem('appointments', JSON.stringify(appointments));
+        loadPatientAppointments();
+      }
+    }
+
+    // Load appointments on page load
+    window.onload = loadPatientAppointments;
+  </script>
+  <!-- The CSS below styles the table and buttons for a modern look -->
+  <style>
+    .modern-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 0.5em;
+      font-size: 1em;
+      background: #fafcff;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    }
+    .modern-table th, .modern-table td {
+      padding: 0.85em 1em;
+      text-align: left;
+    }
+    .modern-table th {
+      background: #e3f0fa;
+      color: #064752;
+      font-weight: 700;
+      border-bottom: 2px solid #b3d4ee;
+    }
+    .modern-table tr:nth-child(even) {
+      background: #f6fbff;
+    }
+    .modern-table tr:hover {
+      background: #eaf6ff;
+      transition: background 0.2s;
+    }
+    .action-btn {
+      background: #1976D2;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      padding: 0.4em 0.7em;
+      font-size: 1.1em;
+      cursor: pointer;
+      transition: background 0.2s;
+      margin: 0 2px;
+    }
+    .action-btn.cancel {
+      background: #e53935;
+    }
+    .action-btn:hover {
+      background: #125ea2;
+    }
+    .action-btn.cancel:hover {
+      background: #b71c1c;
+    }
+    .status-badge {
+      padding: 0.3em 0.8em;
+      border-radius: 12px;
+      font-size: 0.98em;
+      font-weight: 600;
+      color: #fff;
+      display: inline-block;
+    }
+    .status-pending {
+      background: #fbc02d;
+      color: #333;
+    }
+    .status-approved {
+      background: #43a047;
+    }
+    .status-rejected {
+      background: #e53935;
+    }
+    @media (max-width: 600px) {
+      .modern-table th, .modern-table td {
+        padding: 0.6em 0.4em;
+        font-size: 0.95em;
+      }
+      .center-image-container > div {
+        padding: 1em 0.2em;
+      }
+    }
+  </style>
+</body>
+</html>

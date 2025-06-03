@@ -1,0 +1,84 @@
+<script src="../js/script.js"></script>
+<script src="../js/auth.js"></script>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Signup - HealthConnect</title>
+  <link rel="stylesheet" href="../css/style.css" />
+</head>
+<body>
+  <!-- Header: Site title and navigation -->
+  <header>
+    <h1>HealthConnect</h1>
+    <div class="nav-buttons">
+      <!-- Navigation links -->
+      <a href="../index.html" class="nav-button">Home</a>
+      <a href="login.html" class="nav-button">Login</a>
+    </div>
+  </header>
+
+  <main>
+    <section class="center-image-container" style="min-height:unset; margin-top:2rem;">
+      <!-- Signup form for new users -->
+      <form id="signupForm" class="auth-form">
+        <h2 class="auth-title">Create Your Account</h2>
+        <!-- Name input -->
+        <div class="form-group">
+          <label for="signupName">Name:</label>
+          <input type="text" id="signupName" required />
+        </div>
+        <!-- Email input -->
+        <div class="form-group">
+          <label for="signupEmail">Email:</label>
+          <input type="email" id="signupEmail" required />
+        </div>
+        <!-- Password input -->
+        <div class="form-group">
+          <label for="signupPassword">Password:</label>
+          <input type="password" id="signupPassword" required />
+        </div>
+        <!-- Role selection: Doctor or Patient -->
+        <div class="form-group">
+          <label for="signupRole">Select Role:</label>
+          <select id="signupRole" required>
+            <option value="">--Select--</option>
+            <option value="doctor">Doctor</option>
+            <option value="patient">Patient</option>
+          </select>
+        </div>
+        <!-- Doctor name field: Only shown if role is Doctor -->
+        <div class="form-group" id="doctorNameGroup" style="display: none;">
+          <label for="doctorNameField" id="doctorNameLabel">Doctor Name:</label>
+          <input type="text" id="doctorNameField" name="doctorName" />
+        </div>
+        <button type="submit" class="nav-button full-width">Signup</button>
+      </form>
+      <!-- Link to login if user already has an account -->
+      <div style="text-align:center; margin-top:1.2rem; font-size:1em;">
+        Already have an account? <a href="login.html" style="color:#1976D2; font-weight:600; text-decoration:underline;">Login</a>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer: Copyright -->
+  <footer>
+    <p>&copy; 2025 HealthConnect. All rights reserved.</p>
+  </footer>
+
+  <script>
+    // Show doctor name field only when role is doctor
+    // This makes the form dynamic and user-friendly
+    document.getElementById("signupRole").addEventListener("change", function () {
+      const role = this.value;
+      const docGroup = document.getElementById("doctorNameGroup");
+      if (role === "doctor") {
+        docGroup.style.display = "block";
+      } else {
+        docGroup.style.display = "none";
+      }
+    });
+  </script>
+</body>
+</html>

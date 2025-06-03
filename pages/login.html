@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login - HealthConnect</title>
+  <link rel="stylesheet" href="../css/style.css" />
+</head>
+<body>
+  <!-- Header: Site title and navigation -->
+  <header>
+    <h1>HealthConnect</h1>
+    <div class="nav-buttons">
+      <!-- Navigation links -->
+      <a href="../index.html" class="nav-button">Home</a>
+      <a href="signup.html" class="nav-button">Signup</a>
+    </div>
+  </header>
+
+  <main>
+    <section class="center-image-container" style="min-height:unset; margin-top:3rem;">
+      <!-- Login form for existing users -->
+      <form id="loginForm" class="auth-form">
+        <h2 class="auth-title">Login to Your Account</h2>
+        <!-- Email input -->
+        <div class="form-group">
+          <label for="loginEmail">Email:</label>
+          <input type="email" id="loginEmail" required />
+        </div>
+        <!-- Password input -->
+        <div class="form-group">
+          <label for="loginPassword">Password:</label>
+          <input type="password" id="loginPassword" required />
+        </div>
+        <button type="submit" class="nav-button full-width">Login</button>
+      </form>
+    </section>
+  </main>
+
+  <!-- Footer: Copyright -->
+  <footer>
+    <p>&copy; 2025 HealthConnect. All rights reserved.</p>
+  </footer>
+  <script src="../js/script.js"></script>
+  <script src="../js/auth.js"></script>
+</body>
+</html>

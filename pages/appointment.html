@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Your Appointments - HealthConnect</title>
+  <link rel="stylesheet" href="../css/style.css" />
+</head>
+<body>
+  <!-- Header: Site title and navigation -->
+  <header>
+    <h1>HealthConnect</h1>
+    <div class="nav-buttons">
+      <!-- Navigation links -->
+      <a href="../index.html" class="nav-button">Home</a>
+      <a href="patient-dashboard.html" class="nav-button">Dashboard</a>
+    </div>
+  </header>
+ 
+  <main>
+    <section class="center-image-container" style="min-height:unset; margin-top:2rem;">
+      <!-- Section to show patient's appointments and filter options -->
+      <div class="appointments-section">
+        <h2 class="appt-title">Your Appointments</h2>
+        <!-- Filter bar for doctor name and date -->
+        <div class="filter-bar">
+          <div class="filter-group">
+            <label for="filterDoctor">Filter by Doctor Name:</label>
+            <input type="text" id="filterDoctor" placeholder="Enter doctor name" />
+          </div>
+          <div class="filter-group">
+            <label for="filterDate">Filter by Date:</label>
+            <input type="date" id="filterDate" />
+          </div>
+          <button id="filterBtn" class="nav-button filter-btn">Filter</button>
+        </div>
+        <div style="overflow-x:auto;">
+          <!-- Table to display appointments -->
+          <table id="appointmentsTable" class="modern-table" style="margin-top:1.2em;">
+            <thead>
+              <tr>
+                <th>Doctor</th>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Appointment rows will be populated via JS -->
+            </tbody>
+          </table>
+          <!-- Message if no appointments found -->
+          <div id="emptyAppointmentsMsg" style="display:none; text-align:center; color:#888; font-size:1.1em; margin:2em 0;">No appointments found.</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer: Copyright -->
+  <footer>
+    <p>&copy; 2025 HealthConnect. All rights reserved.</p>
+  </footer>
+  <script src="../js/script.js"></script>
+</body>
+</html>

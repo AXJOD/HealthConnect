@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Doctor Dashboard - HealthConnect</title>
+  <link rel="stylesheet" href="../css/style.css" />
+</head>
+<body>
+  <header>
+    <h1>HealthConnect</h1>
+    <div class="nav-buttons">
+      <a href="../index.html" class="nav-button">Home</a>
+      <a href="appointment.html" class="nav-button">Appointments</a>
+    </div>
+  </header>
+
+  <main>
+    <section class="center-image-container" style="min-height:unset; margin-top:2rem; align-items:stretch;">
+      <div style="max-width:900px; width:100%; background:#fff; padding:2rem; border-radius:12px; box-shadow:0 2px 12px rgba(0,0,0,0.07); margin:auto;">
+        <h2 style="text-align:center; color:#064752; margin-bottom:1.5rem;">Your Appointments</h2>
+        <div style="overflow-x:auto;">
+          <table id="doctorAppointmentsTable" class="modern-table">
+            <thead>
+              <tr>
+                <th>Patient</th>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Appointments will be loaded here -->
+            </tbody>
+          </table>
+          <div id="emptyAppointmentsMsg" style="display:none; text-align:center; color:#888; font-size:1.1em; margin:2em 0;">No appointments found.</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 HealthConnect. All rights reserved.</p>
+  </footer>
+  <script src="../js/script.js"></script>
+  <script>
+    function getCurrentUser() {
+      return JSON.parse(localStorage.getItem('currentUser'));
+    }
+    function getAppointments() {
+      return JSON.parse(localStorage.getItem('appointments')) || [];
+    }
+    function saveAppointments(appointments) {
+      localStorage.setItem('appointments', JSON.stringify(appointments));
+    }
+    function loadDoctorAppointments() {
+      const user = getCurrentUser();
+      const appointments = getAppointments();
+      // Show only appointments for this doctor
+      const doctorAppointments = appointments.filter(a => a.doctorName === user?.doctorName);
+      const tbody = document.querySelector('#doctorAppointmentsTable tbody');
+      tbody.innerHTML = '';
+      if (doctorAppointments.length === 0) {
+        document.getElementById('emptyAppointmentsMsg').style.display = 'block';
+        document.getElementById('doctorAppointmentsTable').style.display = 'none';
+      } else {
+        document.getElementById('emptyAppointmentsMsg').style.display = 'none';
+        document.getElementById('doctorAppointmentsTable').style.display = '';
+        doctorAppointments.forEach(app => {
+          const tr = document.createElement('tr');
+          let statusText = app.status || 'Pending';
+          let actionBtns = '';
+          if (statusText === 'Pending') {
+            actionBtns = `
+              <button class="action-btn accept" onclick="updateAppointmentStatus('${app.id}', 'Approved')">Accept</button>
+              <button class="action-btn reject" onclick="updateAppointmentStatus('${app.id}', 'Rejected')">Reject</button>
+            `;
+          } else {
+            actionBtns = `<span style='color:#888;'>-</span>`;
+          }
+          tr.innerHTML = `
+            <td>${app.patientName}</td>
+            <td>${app.date}</td>
+            <td>${app.time}</td>
+            <td><span class="status-badge status-${statusText.toLowerCase()}">${statusText}</span></td>
+            <td>${actionBtns}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      }
+    }
+    function updateAppointmentStatus(id, status) {
+      let appointments = getAppointments();
+      appointments = appointments.map(app => {
+        if (app.id === id) {
+          return { ...app, status };
+        }
+        return app;
+      });
+      saveAppointments(appointments);
+      loadDoctorAppointments();
+    }
+    window.onload = loadDoctorAppointments;
+  </script>
+  <style>
+    .modern-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 0.5em;
+      font-size: 1em;
+      background: #fafcff;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    }
+    .modern-table th, .modern-table td {
+      padding: 0.85em 1em;
+      text-align: left;
+    }
+    .modern-table th {
+      background: #e3f0fa;
+      color: #064752;
+      font-weight: 700;
+      border-bottom: 2px solid #b3d4ee;
+    }
+    .modern-table tr:nth-child(even) {
+      background: #f6fbff;
+    }
+    .modern-table tr:hover {
+      background: #eaf6ff;
+      transition: background 0.2s;
+    }
+    .action-btn {
+      background: #1976D2;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      padding: 0.4em 0.9em;
+      font-size: 1em;
+      cursor: pointer;
+      transition: background 0.2s;
+      margin: 0 2px;
+    }
+    .action-btn.accept {
+      background: #43a047;
+    }
+    .action-btn.reject {
+      background: #e53935;
+    }
+    .action-btn.accept:hover {
+      background: #2e7031;
+    }
+    .action-btn.reject:hover {
+      background: #b71c1c;
+    }
+    .status-badge {
+      padding: 0.3em 0.8em;
+      border-radius: 12px;
+      font-size: 0.98em;
+      font-weight: 600;
+      color: #fff;
+      display: inline-block;
+    }
+    .status-pending {
+      background: #fbc02d;
+      color: #333;
+    }
+    .status-approved {
+      background: #43a047;
+    }
+    .status-rejected {
+      background: #e53935;
+    }
+    @media (max-width: 600px) {
+      .modern-table th, .modern-table td {
+        padding: 0.6em 0.4em;
+        font-size: 0.95em;
+      }
+      .center-image-container > div {
+        padding: 1em 0.2em;
+      }
+    }
+  </style>
+</body>
+</html>
